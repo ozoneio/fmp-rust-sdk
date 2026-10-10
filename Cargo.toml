@@ -1,0 +1,48 @@
+[package]
+name = "fmp-rust-sdk"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Async Rust SDK for Financial Modeling Prep with typed data, subscription awareness, and WebSocket feeds"
+license = "MIT"
+repository = "https://github.com/ozoneio/fmp-rust-sdk"
+documentation = "https://docs.rs/fmp-rust-sdk"
+readme = "README.md"
+keywords = ["fmp", "finance", "stocks", "api", "websocket"]
+categories = ["api-bindings", "finance", "asynchronous"]
+include = ["src/**", "examples/**", "tests/**", ".env.example", "Cargo.toml", "Cargo.lock", "README.md", "LICENSE"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = []
+websocket = ["dep:futures-util", "dep:tokio-tungstenite"]
+
+[dependencies]
+chrono = { version = "0.4.42", default-features = false, features = ["serde", "std"] }
+dotenvy = "0.15.7"
+futures-util = { version = "0.3.31", default-features = false, features = ["sink", "std"], optional = true }
+httpdate = "1.0.3"
+reqwest = { version = "0.13.5", default-features = false, features = ["rustls", "query"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.145"
+thiserror = "2.0.21"
+tokio = { version = "1.53.2", features = ["time", "net", "rt", "macros"] }
+tokio-tungstenite = { version = "0.30.0", default-features = false, features = ["connect", "rustls-tls-webpki-roots"], optional = true }
+tracing = "0.1.41"
+url = "2.5.7"
+
+[dev-dependencies]
+tempfile = "3.27.0"
+tokio = { version = "1.53.2", features = ["rt-multi-thread", "io-util", "sync"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = "warn"
+
+[[example]]
+name = "websocket"
+required-features = ["websocket"]

@@ -1,0 +1,36 @@
+name: Rust
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --all-targets --all-features --locked -- -D warnings
+      - run: cargo test --all-features --locked
+      - run: cargo test --no-default-features --locked
+      - run: cargo doc --all-features --no-deps --locked
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  minimum-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.88'
+      - run: cargo check --all-targets --all-features --locked
