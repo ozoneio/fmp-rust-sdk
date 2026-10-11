@@ -1,6 +1,6 @@
 [package]
 name = "fmp-rust-sdk"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.88"
 description = "Async Rust SDK for Financial Modeling Prep with typed data, subscription awareness, and WebSocket feeds"

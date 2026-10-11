@@ -36,15 +36,17 @@ fn reads_quoted_dotenv_settings_and_leaves_process_environment_unchanged() {
 }
 
 #[test]
-fn missing_or_blank_plan_is_unknown() {
+fn missing_blank_or_free_plan_uses_basic() {
     for contents in [
         "FMP_API_KEY=test-key\n",
+        "FMP_API_KEY=test-key\nFMP_PLAN=\n",
         "FMP_API_KEY=test-key\nFMP_PLAN='   '\n",
+        "FMP_API_KEY=test-key\nFMP_PLAN=free\n",
     ] {
         let file = dotenv_file(contents);
         let client = Client::from_dotenv(file.path(), WebSocketEntitlements::none())
-            .expect("read settings without a declared plan");
-        assert_eq!(client.subscription().plan(), None);
+            .expect("read settings with the free plan");
+        assert_eq!(client.subscription().plan(), Some(Plan::Basic));
     }
 }
 

@@ -12,8 +12,8 @@ struct ConfigValues {
 impl Client {
     /// Creates a client from `FMP_API_KEY` and optional `FMP_PLAN` in the process environment.
     ///
-    /// The API key is required. A missing or blank plan leaves the billing plan
-    /// unknown. WebSocket cluster grants are supplied explicitly.
+    /// The API key is required. A missing or blank plan uses the free plan
+    /// (`Plan::Basic`). WebSocket cluster grants are supplied explicitly.
     pub fn from_env(websocket_entitlements: WebSocketEntitlements) -> Result<Self> {
         let values = ConfigValues {
             api_key: environment_value("FMP_API_KEY")?,
@@ -24,9 +24,9 @@ impl Client {
 
     /// Creates a client from the selected dotenv file without populating the process environment.
     ///
-    /// The file must contain `FMP_API_KEY`. Missing or blank `FMP_PLAN` leaves the
-    /// plan unknown. Unrelated entries are ignored, and duplicate FMP settings
-    /// return an error. Quoting and variable expansion follow `dotenvy` syntax.
+    /// The file must contain `FMP_API_KEY`. Missing or blank `FMP_PLAN` uses the
+    /// free plan (`Plan::Basic`). Unrelated entries are ignored, and duplicate FMP
+    /// settings return an error. Quoting and variable expansion follow `dotenvy` syntax.
     ///
     /// ```no_run
     /// use std::path::Path;
@@ -103,18 +103,21 @@ fn configured_client(
         .map(|value| {
             value.parse::<Plan>().map_err(|_| Error::Configuration {
                 reason: format!(
-                    "FMP_PLAN in {source} is unrecognized; use basic (or free), starter, premium, ultimate, build, enterprise, or leave it blank"
+                    "FMP_PLAN in {source} is unrecognized; use basic (or free), starter, premium, ultimate, build, enterprise, or leave it blank for the free plan"
                 ),
             })
         })
-        .transpose()?;
-    Client::new(&api_key, Subscription::new(plan, websocket_entitlements)).map_err(|error| {
-        match error {
-            Error::Configuration { reason } => Error::Configuration {
-                reason: format!("cannot configure FMP_API_KEY from {source}: {reason}"),
-            },
-            error => error,
-        }
+        .transpose()?
+        .unwrap_or(Plan::Basic);
+    Client::new(
+        &api_key,
+        Subscription::new(Some(plan), websocket_entitlements),
+    )
+    .map_err(|error| match error {
+        Error::Configuration { reason } => Error::Configuration {
+            reason: format!("cannot configure FMP_API_KEY from {source}: {reason}"),
+        },
+        error => error,
     })
 }
 

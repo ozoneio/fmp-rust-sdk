@@ -10,7 +10,7 @@ use std::{error::Error, fmt, str::FromStr, time::Duration};
 
 use serde::{Deserialize, Serialize};
 
-/// A subscription plan explicitly supplied by the account owner.
+/// A configured subscription plan.
 ///
 /// This value describes configuration, not a plan verified by the FMP server.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
